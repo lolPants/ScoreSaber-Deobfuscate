@@ -11,6 +11,7 @@ namespace Deobfuscator
         public readonly Tool de4dot;
         public readonly Tool OsuDecoder;
         public readonly Tool EazFixer;
+        public readonly Tool ILSpy;
 
         private bool IsSetup = false;
         private readonly List<Tool> Tools;
@@ -23,6 +24,7 @@ namespace Deobfuscator
             de4dot = new de4dot(logger);
             OsuDecoder = new OsuDecoder(logger);
             EazFixer = new Eazfixer(logger);
+            ILSpy = new ILSpy(logger);
 
             Tools = new()
             {
@@ -30,6 +32,7 @@ namespace Deobfuscator
                 de4dot,
                 OsuDecoder,
                 EazFixer,
+                ILSpy,
             };
         }
 
