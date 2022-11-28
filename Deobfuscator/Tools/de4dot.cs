@@ -14,7 +14,6 @@ namespace Deobfuscator.Tools
             buildPath: Path.Combine(Environment.CurrentDirectory, "de4dot", "Release", "de4dot.exe"),
             slnName: "de4dot",
             repoUrl: "https://github.com/lolPants/de4dot",
-            resolveSubmodules: true,
             targetCommit: "22bc21240115e8572c8a702288f2e26fd4a51ca8"
         )
         { }
