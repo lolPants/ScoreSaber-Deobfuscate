@@ -153,7 +153,7 @@ namespace Deobfuscator
         public class OutputNotExistsException : Exception { }
         private static void EnsureOutput(Deobfuscator deobfuscator, string outputPath)
         {
-            if (!File.Exists(outputPath))
+            if (!File.Exists(outputPath) && !Directory.Exists(outputPath))
             {
                 deobfuscator.Logger.LogError("Failed, aborting...");
                 throw new OutputNotExistsException();
