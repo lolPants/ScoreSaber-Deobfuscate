@@ -1,4 +1,4 @@
-﻿using CliWrap;
+using CliWrap;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -79,7 +79,7 @@ namespace Deobfuscator
                     .WithValidation(CommandResultValidation.None)
                     .ExecuteFallible();
 
-                Logger.LogInformation($"Repo reset to {TargetCommit}");
+                Logger.LogInformation("Repo reset to {commit}", TargetCommit);
             }
 
             if (ResolveSubmodules)
