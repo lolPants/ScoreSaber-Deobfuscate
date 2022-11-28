@@ -21,6 +21,9 @@ namespace Deobfuscator.Bulk
             [Option('p', "password", Required = true, HelpText = "Symbol password")]
             public string Password { get; set; } = null!;
 
+            [Option('D', "decompile", Required = false, HelpText = "Output a decompiled directory instead of a DLL")]
+            public bool Decompile { get; set; } = false;
+
             [Option('d', "dry-run", Required = false, HelpText = "Don't output a deobfuscated DLL")]
             public bool DryRun { get; set; } = false;
 
@@ -87,7 +90,7 @@ namespace Deobfuscator.Bulk
                 var deps = dependencies.Where(x => x is not null).Cast<string>().ToList();
                 var deobfuscator = new Deobfuscator(loggerFactory, path, options.Password, deps);
 
-                await deobfuscator.Deobfuscate(toolchain, options.DryRun);
+                await deobfuscator.Deobfuscate(toolchain, dryRun: options.DryRun, decompile: options.Decompile);
             }
         }
     }
