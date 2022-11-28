@@ -115,7 +115,7 @@ namespace Deobfuscator
                 Logger.LogInformation("Restoring Nuget packages...");
                 await Cli.Wrap("msbuild")
                     .WithWorkingDirectory(ToolPath)
-                    .WithArguments("-t:restore")
+                    .WithArguments($"-t:restore \"{ToolPath}\\{SlnName}.sln\"")
                     .WithValidation(CommandResultValidation.None)
                     .ExecuteFallible();
 
