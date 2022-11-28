@@ -50,7 +50,7 @@ namespace Deobfuscator
             public DependencyDirNotExistsException(string path) : base(path) { }
         }
 
-        public async Task Deobfuscate(Toolchain toolchain, bool dryRun = false)
+        public async Task Deobfuscate(Toolchain toolchain, bool dryRun = false, bool decompile = false)
         {
             if (!File.Exists(InputPath))
             {
@@ -86,15 +86,31 @@ namespace Deobfuscator
                 string cleaned = await toolchain.de4dot.Execute(this, input);
                 string devirt = await toolchain.EazDevirt.Execute(this, cleaned);
                 string eazfixed = await toolchain.EazFixer.Execute(this, devirt);
-                string output = await toolchain.OsuDecoder.Execute(this, eazfixed);
+                string decoded = await toolchain.OsuDecoder.Execute(this, eazfixed);
+                string? decompiledDir = decompile ? await toolchain.ILSpy.Execute(this, decoded) : null;
 
                 string nameWithoutExtension = Path.GetFileNameWithoutExtension(InputPath);
-                string finalFilename = $"{nameWithoutExtension}-deobfuscated.dll";
+                string projectName = $"{nameWithoutExtension}-deobfuscated";
+                string dllName = $"{projectName}.dll";
 
-                string outputPath = Path.Combine(wd, output);
-                string finalPath = Path.Combine(InputDir, finalFilename);
+                string outputDllPath = Path.Combine(wd, decoded);
+                string finalDllPath = Path.Combine(InputDir, dllName);
 
-                if (!dryRun) File.Copy(outputPath, finalPath, true);
+                if (!dryRun)
+                {
+                    if (decompiledDir is not null)
+                    {
+                        string outputProjectPath = Path.Combine(wd, decompiledDir);
+                        string finalProjectPath = Path.Combine(InputDir, projectName);
+
+                        var source = new DirectoryInfo(outputProjectPath);
+                        source.DeepCopy(finalProjectPath);
+                    }
+                    else
+                    {
+                        File.Copy(outputDllPath, finalDllPath, true);
+                    }
+                }
             }
             catch (Tool.OutputNotExistsException)
             {
