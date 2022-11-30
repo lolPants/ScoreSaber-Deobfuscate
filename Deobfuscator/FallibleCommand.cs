@@ -36,12 +36,12 @@ namespace Deobfuscator
             }
         }
 
-        public static async Task<BufferedCommandResult?> ExecuteFallible(this Command command)
+        public static async Task<BufferedCommandResult> ExecuteFallible(this Command command)
         {
             var result = await command.ExecuteBufferedAsync();
             if (result.ExitCode != 0)
             {
-                throw new Exception(result.StandardOutput, result.StandardError);
+                throw new FallibleCommand.Exception(result.StandardOutput, result.StandardError);
             }
 
             return result;

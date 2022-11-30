@@ -116,6 +116,10 @@ namespace Deobfuscator
             {
                 // Pass
             }
+            catch (FallibleCommand.Exception ex)
+            {
+                Logger.LogCritical("{ex}", ex.Message);
+            }
             finally
             {
                 Directory.Delete(WorkingDirectory, true);

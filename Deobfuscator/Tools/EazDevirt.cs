@@ -27,7 +27,7 @@ namespace Deobfuscator.Tools
             var results = await Cli.Wrap(BuildPath)
                  .WithArguments($"-d \"{path}\"")
                  .WithValidation(CommandResultValidation.None)
-                 .ExecuteBufferedAsync();
+                 .ExecuteFallible();
 
             var output = ParseOutput(results.StandardOutput);
             if (output is not null)
