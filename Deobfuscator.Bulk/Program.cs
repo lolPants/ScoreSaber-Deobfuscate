@@ -27,6 +27,9 @@ namespace Deobfuscator.Bulk
             [Option('d', "dry-run", Required = false, HelpText = "Don't output a deobfuscated DLL")]
             public bool DryRun { get; set; } = false;
 
+            [Option('P', "parallelism", Required = false, HelpText = "Max number of versions to deobfuscate concurrently")]
+            public int Parallelism { get; set; } = 1;
+
             [Option('v', "verbose", Required = false, HelpText = "Verbose logging")]
             public bool Verbose { get; set; } = false;
         }
@@ -69,15 +72,23 @@ namespace Deobfuscator.Bulk
             var toolchain = new Toolchain(loggerFactory);
             await toolchain.Setup();
 
-            foreach (var version in versions)
+            var parallelOptions = new ParallelOptions
             {
-                if (options.Version is not null && version.Version != options.Version) continue;
+                MaxDegreeOfParallelism = options.Parallelism,
+            };
+
+            await Parallel.ForEachAsync(versions, parallelOptions, async (version, _) =>
+            {
+                if (options.Version is not null && version.Version != options.Version)
+                {
+                    return;
+                }
 
                 var path = version.Filepath;
                 if (path is null)
                 {
                     log.LogWarning("{version} does not exist!", version);
-                    continue;
+                    return;
                 }
 
                 List<string?> dependencies = new()
@@ -91,7 +102,7 @@ namespace Deobfuscator.Bulk
                 var deobfuscator = new Deobfuscator(loggerFactory, path, options.Password, deps);
 
                 await deobfuscator.Deobfuscate(toolchain, dryRun: options.DryRun, decompile: options.Decompile);
-            }
+            });
         }
     }
 }

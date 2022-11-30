@@ -52,6 +52,8 @@ namespace Deobfuscator
 
         public async Task Deobfuscate(Toolchain toolchain, bool dryRun = false, bool decompile = false)
         {
+            toolchain.Ensure();
+
             if (!File.Exists(InputPath))
             {
                 throw new InputNotExistsException(InputPath);
@@ -64,8 +66,6 @@ namespace Deobfuscator
                     throw new DependencyDirNotExistsException(dependencyDir);
                 }
             }
-
-            await toolchain.Setup();
 
             var wd = WorkingDirectory;
             if (Directory.Exists(wd)) Directory.Delete(wd, true);

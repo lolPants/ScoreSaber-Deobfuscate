@@ -1,5 +1,6 @@
 ﻿using Deobfuscator.Tools;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -36,18 +37,26 @@ namespace Deobfuscator
             };
         }
 
+        public void Ensure()
+        {
+            if (!IsSetup)
+            {
+                throw new Exception("Must call Toolchain.Setup();");
+            }
+        }
+
         public async Task Setup()
         {
             if (IsSetup) return;
 
-            foreach (var tool in Tools)
+            await Parallel.ForEachAsync(Tools, async (tool, _) =>
             {
                 using (tool.Logger.BeginScope(tool.SlnName))
                 {
                     await tool.Clone();
                     await tool.Build();
                 }
-            }
+            });
 
             IsSetup = true;
         }
