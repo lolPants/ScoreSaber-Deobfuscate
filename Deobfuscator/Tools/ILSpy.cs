@@ -1,6 +1,5 @@
 ﻿using CliWrap;
 using Microsoft.Extensions.Logging;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,8 +9,8 @@ namespace Deobfuscator.Tools
     {
         internal ILSpy(ILogger logger) : base(
             logger: logger,
-            path: Path.Combine(Environment.CurrentDirectory, "ILSpy"),
-            buildPath: Path.Combine(Environment.CurrentDirectory, "ILSpy", "ICSharpCode.Decompiler.Console", "bin", "Release", "net6.0", "ilspycmd.exe"),
+            name: "ILSpy",
+            relativeBuildPath: Path.Combine("ICSharpCode.Decompiler.Console", "bin", "Release", "net6.0", "ilspycmd.exe"),
             slnName: "ILSpy",
             repoUrl: "https://github.com/icsharpcode/ILSpy",
             targetCommit: "7685d15fadbb2c126d47f19209336bbbeb72a792",

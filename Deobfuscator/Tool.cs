@@ -11,8 +11,10 @@ namespace Deobfuscator
         #region Properties
         internal ILogger Logger { get; }
 
-        internal string ToolPath { get; private set; }
-        internal string BuildPath { get; private set; }
+        internal string Name { get; }
+        internal string ToolPath { get => Path.Combine(Environment.CurrentDirectory, Name); }
+        private string RelativeBuildPath { get; }
+        internal string BuildPath { get => Path.Combine(ToolPath, RelativeBuildPath); }
         internal string? BuildPathDirectory => Path.GetDirectoryName(BuildPath);
 
 
@@ -25,12 +27,9 @@ namespace Deobfuscator
         {
             get
             {
-                if (Directory.Exists(ToolPath))
+                if (Directory.Exists(ToolPath) && Directory.GetFiles(ToolPath).Length > 0)
                 {
-                    if (Directory.GetFiles(ToolPath).Length > 0)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 return true;
@@ -38,11 +37,11 @@ namespace Deobfuscator
         }
         #endregion
 
-        internal Tool(ILogger logger, string path, string buildPath, string slnName, string repoUrl, string? targetCommit = null, bool restoreNugetPackages = false, bool resolveSubmodules = false)
+        internal Tool(ILogger logger, string name, string relativeBuildPath, string slnName, string repoUrl, string? targetCommit = null, bool restoreNugetPackages = false, bool resolveSubmodules = false)
         {
             Logger = logger;
-            ToolPath = path;
-            BuildPath = buildPath;
+            Name = name;
+            RelativeBuildPath = relativeBuildPath;
             SlnName = slnName;
             RepoUrl = repoUrl;
             TargetCommit = targetCommit;
@@ -128,7 +127,14 @@ namespace Deobfuscator
                 .WithValidation(CommandResultValidation.None)
                 .ExecuteFallible();
 
-            Logger.LogInformation($"Built.");
+            if (!File.Exists(BuildPath))
+            {
+                Logger.LogCritical("Failed to build {tool}", Name);
+            }
+            else
+            {
+                Logger.LogInformation($"Built.");
+            }
         }
         #endregion
 
@@ -137,7 +143,7 @@ namespace Deobfuscator
 
         internal async Task<string> Execute(Deobfuscator deobfuscator, string inputFile)
         {
-            using (deobfuscator.Logger.BeginScope(SlnName))
+            using (deobfuscator.Logger.BeginScope(Name))
             {
                 string path = Path.Combine(deobfuscator.WorkingDirectory, inputFile);
                 string fileName = Path.GetFileNameWithoutExtension(inputFile);

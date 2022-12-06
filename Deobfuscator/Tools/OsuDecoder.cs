@@ -1,6 +1,5 @@
 ﻿using CliWrap;
 using Microsoft.Extensions.Logging;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,8 +9,8 @@ namespace Deobfuscator.Tools
     {
         internal OsuDecoder(ILogger logger) : base(
             logger: logger,
-            path: Path.Combine(Environment.CurrentDirectory, "osu-decoder"),
-            buildPath: Path.Combine(Environment.CurrentDirectory, "osu-decoder", "osu!decoder", "bin", "Release", "osu!decoder.exe"),
+            name: "osu-decoder",
+            relativeBuildPath: Path.Combine("osu!decoder", "bin", "Release", "osu!decoder.exe"),
             slnName: "osu!decoder",
             repoUrl: "https://github.com/Umbranoxio/osu-decoder",
             restoreNugetPackages: true,

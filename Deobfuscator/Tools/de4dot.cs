@@ -1,6 +1,5 @@
 ﻿using CliWrap;
 using Microsoft.Extensions.Logging;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,8 +9,8 @@ namespace Deobfuscator.Tools
     {
         internal de4dot(ILogger logger) : base(
             logger: logger,
-            path: Path.Combine(Environment.CurrentDirectory, "de4dot"),
-            buildPath: Path.Combine(Environment.CurrentDirectory, "de4dot", "Release", "de4dot.exe"),
+            name: "de4dot",
+            relativeBuildPath: Path.Combine("Release", "de4dot.exe"),
             slnName: "de4dot",
             repoUrl: "https://github.com/lolPants/de4dot",
             targetCommit: "22bc21240115e8572c8a702288f2e26fd4a51ca8"

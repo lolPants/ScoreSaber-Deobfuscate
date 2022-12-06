@@ -1,6 +1,5 @@
 ﻿using CliWrap;
 using Microsoft.Extensions.Logging;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,8 +9,8 @@ namespace Deobfuscator.Tools
     {
         internal Eazfixer(ILogger logger) : base(
             logger: logger,
-            path: Path.Combine(Environment.CurrentDirectory, "EazFixer"),
-            buildPath: Path.Combine(Environment.CurrentDirectory, "EazFixer", "EazFixer", "bin", "Release", "net472", "EazFixer.exe"),
+            name: "EazFixer",
+            relativeBuildPath: Path.Combine("EazFixer", "bin", "Release", "net472", "EazFixer.exe"),
             slnName: "EazFixer",
             repoUrl: "https://github.com/holly-hacker/EazFixer",
             restoreNugetPackages: true

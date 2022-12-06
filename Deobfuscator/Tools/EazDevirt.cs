@@ -12,8 +12,8 @@ namespace Deobfuscator.Tools
     {
         internal EazDevirt(ILogger logger) : base(
             logger: logger,
-            path: Path.Combine(Environment.CurrentDirectory, "eazdevirt"),
-            buildPath: Path.Combine(Environment.CurrentDirectory, "eazdevirt", "bin", "Release", "eazdevirt.exe"),
+            name: "eazdevirt",
+            relativeBuildPath: Path.Combine("bin", "Release", "eazdevirt.exe"),
             slnName: "eazdevirt",
             repoUrl: "https://github.com/lolPants/eazdevirt",
             targetCommit: "e585d748f0d118b5103ed6deb27940c9e5191a9e"
