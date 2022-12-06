@@ -55,7 +55,7 @@ namespace Deobfuscator.Bulk
 
             Filename = lines[0];
             Version = lines[1];
-            GameVersion = lines[4];
+            GameVersion = lines[4].TrimStart('*').TrimStart('~');
             SHA1 = lines[5];
 
             Platform = lines[2] switch
