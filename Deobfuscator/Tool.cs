@@ -71,7 +71,7 @@ namespace Deobfuscator
                 .WithValidation(CommandResultValidation.None)
                 .ExecuteFallible();
 
-            if (TargetCommit != string.Empty)
+            if (TargetCommit is not null && TargetCommit != string.Empty)
             {
                 await Cli.Wrap("git")
                     .WithArguments($"reset --hard {TargetCommit}")
