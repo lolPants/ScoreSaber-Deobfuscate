@@ -1,5 +1,4 @@
 ﻿using CliWrap;
-using CliWrap.Buffered;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace Deobfuscator.Tools
             buildPath: Path.Combine(Environment.CurrentDirectory, "eazdevirt", "bin", "Release", "eazdevirt.exe"),
             slnName: "eazdevirt",
             repoUrl: "https://github.com/lolPants/eazdevirt",
-            targetCommit: "0d287d2ab0423f0079c9aaad177762670079b3a6"
+            targetCommit: "e585d748f0d118b5103ed6deb27940c9e5191a9e"
         )
         { }
 
