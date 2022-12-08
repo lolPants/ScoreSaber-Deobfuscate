@@ -81,7 +81,6 @@ namespace Deobfuscator.Bulk
                 MaxDegreeOfParallelism = options.Parallelism,
             };
 
-            ConcurrentDictionary<string, string> report = new();
             await Parallel.ForEachAsync(versions, parallelOptions, async (version, _) =>
             {
                 if (options.Version is not null && version.Version != options.Version)
@@ -107,7 +106,7 @@ namespace Deobfuscator.Bulk
                 var deobfuscator = new Deobfuscator(loggerFactory, path, options.Password, deps);
 
                 var success = await deobfuscator.Deobfuscate(toolchain, dryRun: options.DryRun, decompile: options.Decompile);
-                report.TryAdd(version.Filename, success ? "success" : "failure");
+                version.Ok = success;
             });
 
             if (options.ReportFile is not null)
@@ -115,9 +114,13 @@ namespace Deobfuscator.Bulk
                 using var writer = new StreamWriter(options.ReportFile);
                 await writer.WriteLineAsync("version\tstatus");
 
-                foreach (var (key, value) in report)
+                foreach (var version in versions)
                 {
-                    await writer.WriteLineAsync($"{key}\t{value}");
+                    if (version.Ok is not null)
+                    {
+                        var status = (bool)version.Ok ? "success" : "failure";
+                        await writer.WriteLineAsync($"{version.Filename}\t{status}");
+                    }
                 }
 
                 await writer.FlushAsync();

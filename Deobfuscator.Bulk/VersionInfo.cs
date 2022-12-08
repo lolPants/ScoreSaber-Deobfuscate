@@ -35,6 +35,8 @@ namespace Deobfuscator.Bulk
         internal string? LibsDep { get => DependencyDirectory("Libs"); }
         internal string? PluginsDep { get => DependencyDirectory("Plugins"); }
 
+        internal bool? Ok { get; set; } = null;
+
         private string? DependencyDirectory(string name)
         {
             var path = Path.Combine(Root, GameVersion, name);
