@@ -10,13 +10,13 @@ namespace Deobfuscator.Tools
 {
     internal class EazDevirt : Tool
     {
-        internal EazDevirt(ILogger logger) : base(
+        internal EazDevirt(ILogger logger, string? name = null, string? targetCommit = null) : base(
             logger: logger,
-            name: "eazdevirt",
+            name: name ?? "eazdevirt",
             relativeBuildPath: Path.Combine("bin", "Release", "eazdevirt.exe"),
             slnName: "eazdevirt",
-            repoUrl: "https://github.com/lolPants/eazdevirt",
-            targetCommit: "e585d748f0d118b5103ed6deb27940c9e5191a9e"
+            repoUrl: "https://github.com/Umbranoxio/eazdevirt",
+            targetCommit: targetCommit ?? "01c9db538e0271e00fc590040f298b8e0f92366e"
         )
         { }
 

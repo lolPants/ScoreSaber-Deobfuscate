@@ -9,6 +9,7 @@ namespace Deobfuscator
     public class Toolchain
     {
         public readonly Tool EazDevirt;
+        public readonly Tool EazDevirt_2018_1;
         public readonly Tool de4dot;
         public readonly Tool OsuDecoder;
         public readonly Tool EazFixer;
@@ -22,6 +23,7 @@ namespace Deobfuscator
             var logger = loggerFactory.CreateLogger("Toolchain");
 
             EazDevirt = new EazDevirt(logger);
+            EazDevirt_2018_1 = new EazDevirt_2018_1(logger);
             de4dot = new de4dot(logger);
             OsuDecoder = new OsuDecoder(logger);
             EazFixer = new Eazfixer(logger);
@@ -30,6 +32,7 @@ namespace Deobfuscator
             Tools = new()
             {
                 EazDevirt,
+                EazDevirt_2018_1,
                 de4dot,
                 OsuDecoder,
                 EazFixer,
