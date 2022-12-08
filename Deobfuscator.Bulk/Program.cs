@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,6 +30,9 @@ namespace Deobfuscator.Bulk
 
             [Option('P', "parallelism", Required = false, HelpText = "Max number of versions to deobfuscate concurrently")]
             public int Parallelism { get; set; } = 1;
+
+            [Option('r', "report", Required = false, HelpText = "Optional report file path")]
+            public string? ReportFile { get; set; }
 
             [Option('v', "verbose", Required = false, HelpText = "Verbose logging")]
             public bool Verbose { get; set; } = false;
@@ -77,6 +81,7 @@ namespace Deobfuscator.Bulk
                 MaxDegreeOfParallelism = options.Parallelism,
             };
 
+            ConcurrentDictionary<string, string> report = new();
             await Parallel.ForEachAsync(versions, parallelOptions, async (version, _) =>
             {
                 if (options.Version is not null && version.Version != options.Version)
@@ -101,8 +106,22 @@ namespace Deobfuscator.Bulk
                 var deps = dependencies.Where(x => x is not null).Cast<string>().ToList();
                 var deobfuscator = new Deobfuscator(loggerFactory, path, options.Password, deps);
 
-                await deobfuscator.Deobfuscate(toolchain, dryRun: options.DryRun, decompile: options.Decompile);
+                var success = await deobfuscator.Deobfuscate(toolchain, dryRun: options.DryRun, decompile: options.Decompile);
+                report.TryAdd(version.Filename, success ? "success" : "failure");
             });
+
+            if (options.ReportFile is not null)
+            {
+                using var writer = new StreamWriter(options.ReportFile);
+                await writer.WriteLineAsync("version\tstatus");
+
+                foreach (var (key, value) in report)
+                {
+                    await writer.WriteLineAsync($"{key}\t{value}");
+                }
+
+                await writer.FlushAsync();
+            }
         }
     }
 }
