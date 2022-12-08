@@ -51,91 +51,111 @@ namespace Deobfuscator
             public DependencyDirNotExistsException(string path) : base(path) { }
         }
 
-        public async Task Deobfuscate(Toolchain toolchain, bool dryRun = false, bool decompile = false)
+        public async Task<bool> Deobfuscate(Toolchain toolchain, bool dryRun = false, bool decompile = false)
         {
-            toolchain.Ensure();
-
-            if (!File.Exists(InputPath))
+            var run = async () =>
             {
-                throw new InputNotExistsException(InputPath);
-            }
+                toolchain.Ensure();
 
-            foreach (var dependencyDir in DependencyDirectories)
-            {
-                if (!Directory.Exists(dependencyDir))
+                if (!File.Exists(InputPath))
                 {
-                    throw new DependencyDirNotExistsException(dependencyDir);
+                    throw new InputNotExistsException(InputPath);
                 }
-            }
 
-            var wd = WorkingDirectory;
-            if (Directory.Exists(wd)) Directory.Delete(wd, true);
-            Directory.CreateDirectory(wd);
+                foreach (var dependencyDir in DependencyDirectories)
+                {
+                    if (!Directory.Exists(dependencyDir))
+                    {
+                        throw new DependencyDirNotExistsException(dependencyDir);
+                    }
+                }
 
-            foreach (var dependencyDir in DependencyDirectories)
-            {
-                var source = new DirectoryInfo(dependencyDir);
-                source.DeepCopy(wd);
-            }
+                var wd = WorkingDirectory;
+                if (Directory.Exists(wd)) Directory.Delete(wd, true);
+                Directory.CreateDirectory(wd);
 
-            string fileName = Path.GetFileName(InputPath);
-            string input = Path.Combine(wd, fileName);
-            File.Copy(InputPath, input);
+                foreach (var dependencyDir in DependencyDirectories)
+                {
+                    var source = new DirectoryInfo(dependencyDir);
+                    source.DeepCopy(wd);
+                }
 
-            try
-            {
-                string cleaned = await toolchain.de4dot.Execute(this, input);
-                string devirt;
+                string fileName = Path.GetFileName(InputPath);
+                string input = Path.Combine(wd, fileName);
+                File.Copy(InputPath, input);
 
                 try
                 {
-                    devirt = await toolchain.EazDevirt.Execute(this, cleaned);
-                }
-                catch (EazDevirt.FailException)
-                {
-                    devirt = await toolchain.EazDevirt_2018_1.Execute(this, cleaned);
-                }
+                    var (cleaned, _) = await toolchain.de4dot.Execute(this, input);
+                    (string, bool) devirt;
 
-
-                string eazfixed = await toolchain.EazFixer.Execute(this, devirt);
-                string decoded = await toolchain.OsuDecoder.Execute(this, eazfixed);
-                string? decompiledDir = decompile ? await toolchain.ILSpy.Execute(this, decoded) : null;
-
-                string nameWithoutExtension = Path.GetFileNameWithoutExtension(InputPath);
-                string projectName = $"{nameWithoutExtension}-deobfuscated";
-                string dllName = $"{projectName}.dll";
-
-                string outputDllPath = Path.Combine(wd, decoded);
-                string finalDllPath = Path.Combine(InputDir, dllName);
-
-                if (!dryRun)
-                {
-                    if (decompiledDir is not null)
+                    try
                     {
-                        string outputProjectPath = Path.Combine(wd, decompiledDir);
-                        string finalProjectPath = Path.Combine(InputDir, projectName);
-
-                        var source = new DirectoryInfo(outputProjectPath);
-                        source.DeepCopy(finalProjectPath);
+                        devirt = await toolchain.EazDevirt.Execute(this, cleaned);
                     }
-                    else
+                    catch (EazDevirt.FailException)
                     {
-                        File.Copy(outputDllPath, finalDllPath, true);
+                        devirt = await toolchain.EazDevirt_2018_1.Execute(this, cleaned);
                     }
+
+                    var (eazfixed, _) = await toolchain.EazFixer.Execute(this, devirt.Item1);
+                    var (decoded, _) = await toolchain.OsuDecoder.Execute(this, eazfixed);
+                    (string, bool)? decompiledDir = decompile ? await toolchain.ILSpy.Execute(this, decoded) : null;
+
+                    string nameWithoutExtension = Path.GetFileNameWithoutExtension(InputPath);
+                    string projectName = $"{nameWithoutExtension}-deobfuscated";
+                    string dllName = $"{projectName}.dll";
+
+                    string outputDllPath = Path.Combine(wd, decoded);
+                    string finalDllPath = Path.Combine(InputDir, dllName);
+
+                    if (!dryRun)
+                    {
+                        if (decompiledDir is not null)
+                        {
+                            string dir = decompiledDir.Value.Item1;
+                            string outputProjectPath = Path.Combine(wd, dir);
+                            string finalProjectPath = Path.Combine(InputDir, projectName);
+
+                            var source = new DirectoryInfo(outputProjectPath);
+                            source.DeepCopy(finalProjectPath);
+                        }
+                        else
+                        {
+                            File.Copy(outputDllPath, finalDllPath, true);
+                        }
+                    }
+
+                    return devirt.Item2;
                 }
-            }
-            catch (Tool.OutputNotExistsException)
+                catch (Tool.OutputNotExistsException)
+                {
+                    // Pass
+                    return false;
+                }
+                catch (FallibleCommand.Exception ex)
+                {
+                    Logger.LogCritical("{ex}", ex.Message);
+                    return false;
+                }
+                finally
+                {
+                    Directory.Delete(WorkingDirectory, true);
+                }
+            };
+
+            var ok = await run();
+
+            if (ok)
             {
-                // Pass
+                Logger.LogInformation("Successfully deobfuscated!");
             }
-            catch (FallibleCommand.Exception ex)
+            else
             {
-                Logger.LogCritical("{ex}", ex.Message);
+                Logger.LogError("Deobfuscation unsuccessful.");
             }
-            finally
-            {
-                Directory.Delete(WorkingDirectory, true);
-            }
+
+            return ok;
         }
     }
 }

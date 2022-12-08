@@ -18,7 +18,7 @@ namespace Deobfuscator.Tools
         )
         { }
 
-        protected override async Task<string> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName)
+        protected override async Task<(string, bool)> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName)
         {
             var log = deobfuscator.Logger;
 
@@ -36,7 +36,7 @@ namespace Deobfuscator.Tools
             }
 
             log.LogInformation("Decompiled assembly.");
-            return "decomp";
+            return ("decomp", true);
         }
     }
 }

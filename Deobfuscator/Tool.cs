@@ -139,20 +139,20 @@ namespace Deobfuscator
         #endregion
 
         #region Processing
-        protected abstract Task<string> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName);
+        protected abstract Task<(string, bool)> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName);
 
-        internal async Task<string> Execute(Deobfuscator deobfuscator, string inputFile)
+        internal async Task<(string, bool)> Execute(Deobfuscator deobfuscator, string inputFile)
         {
             using (deobfuscator.Logger.BeginScope(Name))
             {
                 string path = Path.Combine(deobfuscator.WorkingDirectory, inputFile);
                 string fileName = Path.GetFileNameWithoutExtension(inputFile);
-                string outputFile = await ExecuteInternal(deobfuscator, path, fileName);
+                var (outputFile, ok) = await ExecuteInternal(deobfuscator, path, fileName);
 
                 string outputPath = Path.Combine(deobfuscator.WorkingDirectory, outputFile);
                 EnsureOutput(deobfuscator, outputPath);
 
-                return outputFile;
+                return (outputFile, ok);
             }
         }
 

@@ -20,7 +20,7 @@ namespace Deobfuscator.Tools
         )
         { }
 
-        protected override async Task<string> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName)
+        protected override async Task<(string, bool)> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName)
         {
             var log = deobfuscator.Logger;
             var results = await Cli.Wrap(BuildPath)
@@ -29,6 +29,7 @@ namespace Deobfuscator.Tools
                  .ExecuteFallible();
 
             var output = ParseOutput(results.StandardOutput);
+            bool isOk = false;
             if (output is not null)
             {
                 var ok = output.MethodProgress;
@@ -54,6 +55,7 @@ namespace Deobfuscator.Tools
                 }
                 else
                 {
+                    isOk = true;
                     log.LogInformation("Devirtualized {ok} / {total} methods", ok, total);
                 }
             }
@@ -62,7 +64,7 @@ namespace Deobfuscator.Tools
                 log.LogInformation("{stdout}", results.StandardOutput);
             }
 
-            return $"{fileName}-devirtualized.dll";
+            return ($"{fileName}-devirtualized.dll", isOk);
         }
 
         internal record Output

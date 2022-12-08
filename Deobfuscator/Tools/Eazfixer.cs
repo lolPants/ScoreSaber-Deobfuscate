@@ -17,7 +17,7 @@ namespace Deobfuscator.Tools
         )
         { }
 
-        protected override async Task<string> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName)
+        protected override async Task<(string, bool)> ExecuteInternal(Deobfuscator deobfuscator, string path, string fileName)
         {
             var log = deobfuscator.Logger;
             var results = await Cli.Wrap(BuildPath)
@@ -31,7 +31,7 @@ namespace Deobfuscator.Tools
             }
 
             log.LogInformation("Deobfuscated assembly.");
-            return $"{fileName}-eazfix.dll";
+            return ($"{fileName}-eazfix.dll", true);
         }
     }
 }
