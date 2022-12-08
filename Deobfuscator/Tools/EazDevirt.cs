@@ -75,9 +75,25 @@ namespace Deobfuscator.Tools
 
         private static readonly Regex SuccessRX = new(@"Devirtualized (?<ok>\d+)/(?<total>\d+) methods", RegexOptions.Compiled);
         private static readonly Regex TypeErrorRX = new(@"dnlib\.DotNet\.TypeResolveException: Could not resolve type: (?<type>.+)", RegexOptions.Compiled);
+        private static readonly List<string> FailErrors = new()
+        {
+            "System.IO.EndOfStreamException",
+            "System.IndexOutOfRangeException",
+            "System.OverflowException",
+        };
+
+        internal class FailException : Exception
+        {
+            public FailException(string message) : base(message) { }
+        }
 
         private static Output? ParseOutput(string stdout)
         {
+            foreach (var error in FailErrors)
+            {
+                if (stdout.Contains(error)) throw new FailException(error);
+            } 
+
             (int, int)? progress = null;
             HashSet<string> missingTypes = new();
 

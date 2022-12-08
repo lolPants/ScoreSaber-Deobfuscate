@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Deobfuscator.Tools;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -84,7 +85,18 @@ namespace Deobfuscator
             try
             {
                 string cleaned = await toolchain.de4dot.Execute(this, input);
-                string devirt = await toolchain.EazDevirt.Execute(this, cleaned);
+                string devirt;
+
+                try
+                {
+                    devirt = await toolchain.EazDevirt.Execute(this, cleaned);
+                }
+                catch (EazDevirt.FailException)
+                {
+                    devirt = await toolchain.EazDevirt_2018_1.Execute(this, cleaned);
+                }
+
+
                 string eazfixed = await toolchain.EazFixer.Execute(this, devirt);
                 string decoded = await toolchain.OsuDecoder.Execute(this, eazfixed);
                 string? decompiledDir = decompile ? await toolchain.ILSpy.Execute(this, decoded) : null;
