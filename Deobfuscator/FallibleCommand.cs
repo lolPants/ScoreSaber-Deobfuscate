@@ -12,15 +12,16 @@ namespace Deobfuscator
             public string StdOutput { get; private set; }
             public string StdError { get; private set; }
 
-            public Exception(string stdOutput, string stdError) : base(Output(stdOutput, stdError))
+            public Exception(string command, string stdOutput, string stdError) : base(Output(command, stdOutput, stdError))
             {
                 StdOutput = stdOutput;
                 StdError = stdError;
             }
 
-            private static string Output(string output, string error)
+            private static string Output(string command, string output, string error)
             {
                 var builder = new StringBuilder();
+                builder.AppendLine($"Error while running command: {command}").Append('\n');
 
                 if (output != string.Empty)
                 {
@@ -41,7 +42,7 @@ namespace Deobfuscator
             var result = await command.ExecuteBufferedAsync();
             if (result.ExitCode != 0)
             {
-                throw new FallibleCommand.Exception(result.StandardOutput, result.StandardError);
+                throw new FallibleCommand.Exception(command.ToString(), result.StandardOutput, result.StandardError);
             }
 
             return result;
