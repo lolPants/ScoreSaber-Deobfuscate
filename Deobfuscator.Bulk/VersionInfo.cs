@@ -32,6 +32,7 @@ namespace Deobfuscator.Bulk
         }
 
         internal string? GameAssembliesDep { get => DependencyDirectory("Game Assemblies"); }
+        internal string? OculusAssembliesDep { get => Platform == EPlatform.Oculus ? DependencyDirectory("Oculus Assemblies") : null; }
         internal string? LibsDep { get => DependencyDirectory("Libs"); }
         internal string? PluginsDep { get => DependencyDirectory("Plugins"); }
 

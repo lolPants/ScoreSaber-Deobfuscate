@@ -98,6 +98,7 @@ namespace Deobfuscator.Bulk
                 List<string?> dependencies = new()
                 {
                     version.GameAssembliesDep,
+                    version.OculusAssembliesDep,
                     version.LibsDep,
                     version.PluginsDep,
                 };
